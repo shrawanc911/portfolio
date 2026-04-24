@@ -1,187 +1,130 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Braces, Gauge, LayoutGrid } from 'lucide-react';
+import { profile } from '../content/site';
+import { prefersReducedMotion } from '../utils/motion';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const highlights = [
-    {
-        Icon: Braces,
-        title: 'Full-Stack Mindset',
-        desc: 'From React frontends to Node.js backends — I own the full picture, shipping features end-to-end.',
-    },
-    {
-        Icon: Gauge,
-        title: 'Performance First',
-        desc: 'Redis caching, batch operations, worker threads — every optimization matters at scale.',
-    },
-    {
-        Icon: LayoutGrid,
-        title: 'System Architect',
-        desc: 'Designing pipelines with workers, queues, cron jobs, and pub/sub for real-time data flow.',
-    },
+  {
+    Icon: Braces,
+    title: 'Full-stack mindset',
+    desc: 'I like owning the whole feature path, from API contracts and data flow to the UI that makes the work usable.',
+  },
+  {
+    Icon: Gauge,
+    title: 'Performance first',
+    desc: 'Caching, batch jobs, and lean client state are usually where the product starts to feel noticeably better.',
+  },
+  {
+    Icon: LayoutGrid,
+    title: 'System design',
+    desc: 'I enjoy breaking product problems into queues, workers, schedules, and real-time channels that stay understandable.',
+  },
 ];
-
-const counters = [
-    { label: 'Stocks Data Processed', target: 5654, suffix: '+' },
-    { label: 'Months of Shipping', target: 7, suffix: '+' },
-    { label: 'Systems Architected', target: 12, suffix: '+' },
-];
-
-function AnimatedCounter({
-    target,
-    suffix,
-}: {
-    target: number;
-    suffix: string;
-}) {
-    const [count, setCount] = useState(0);
-    const ref = useRef<HTMLSpanElement>(null);
-    const triggered = useRef(false);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-
-        ScrollTrigger.create({
-            trigger: el,
-            start: 'top 90%',
-            onEnter: () => {
-                if (triggered.current) return;
-                triggered.current = true;
-                const obj = { val: 0 };
-                gsap.to(obj, {
-                    val: target,
-                    duration: 2,
-                    ease: 'power2.out',
-                    onUpdate: () => setCount(Math.floor(obj.val)),
-                });
-            },
-        });
-    }, [target]);
-
-    return (
-        <span ref={ref} className="text-4xl sm:text-5xl font-bold gradient-text">
-            {count.toLocaleString()}
-            {suffix}
-        </span>
-    );
-}
 
 export default function About() {
-    const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-    useEffect(() => {
-        const cards = sectionRef.current?.querySelectorAll('.highlight-card');
-        if (cards) {
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    stagger: 0.15,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top 75%',
-                    },
-                }
-            );
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const cards = sectionRef.current?.querySelectorAll('.highlight-card');
+    if (!cards?.length) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 76%',
+          },
         }
-    }, []);
+      );
+    }, sectionRef);
 
-    return (
-        <section id="about" ref={sectionRef} className="reveal-section section-padding">
-            <div className="max-w-6xl mx-auto">
-                {/* Section header */}
-                <div className="text-center mb-16">
-                    <span
-                        className="inline-block text-sm font-semibold tracking-widest uppercase mb-4"
-                        style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-code)' }}
-                    >
-                        About Me
-                    </span>
-                    <h2
-                        className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6"
-                        style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                        Building the engine
-                        <br />
-                        <span className="gradient-text">behind the product.</span>
-                    </h2>
-                    <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--color-secondary)' }}>
-                        I'm a final-year B.Tech student and full-stack developer at{' '}
-                        <a
-                            href="https://aarthik.ai"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-semibold underline decoration-dotted underline-offset-4"
-                            style={{ color: 'var(--color-accent)' }}
-                        >
-                            Aarthik.ai
-                        </a>
-                        , where I architect backend systems handling real-time financial data,
-                        portfolio computing, and AI-powered features — from workers and queues
-                        to WebSocket streaming and vector search.
-                    </p>
-                </div>
+    return () => ctx.revert();
+  }, []);
 
-                {/* Highlight cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20">
-                    {highlights.map(({ Icon, title, desc }, i) => (
-                        <div
-                            key={i}
-                            className="highlight-card card-surface group p-8 rounded-3xl border transition-all duration-300 hover:-translate-y-1"
-                            style={{
-                                backgroundColor: 'var(--color-surface)',
-                                borderColor: 'var(--color-border)',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.boxShadow = '0 8px 30px rgba(255,107,44,0.1)';
-                                e.currentTarget.style.borderColor = 'rgba(255,107,44,0.2)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                                e.currentTarget.style.borderColor = 'var(--color-border)';
-                            }}
-                        >
-                            <div
-                                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110"
-                                style={{ background: 'rgba(255,107,44,0.1)' }}
-                            >
-                                <Icon size={24} color="var(--color-accent)" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
-                                {title}
-                            </h3>
-                            <p style={{ color: 'var(--color-secondary)', lineHeight: 1.7 }}>{desc}</p>
-                        </div>
-                    ))}
-                </div>
+  return (
+    <section id="about" ref={sectionRef} className="reveal-section section-padding">
+      <div className="section-shell">
+        <div className="grid items-start gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
+          <div>
+            <span className="eyebrow">About me</span>
+            <h2 className="section-title">
+              I like building the part
+              <span className="gradient-text"> behind the magic.</span>
+            </h2>
+            <p className="section-copy mt-6">
+              I am a final-year B.Tech student based in {profile.location},
+              currently doing backend-first product work with Aarthik.ai. The
+              projects that excite me most are the ones where architecture and
+              user experience affect each other: data-heavy systems, real-time
+              features, and interfaces that still need to feel simple.
+            </p>
+            <p className="section-copy mt-4">
+              My sweet spot is taking an engineering problem that could become
+              messy, then shaping it into queues, APIs, caching layers, and
+              frontend states that are easier to ship and easier to trust.
+            </p>
+          </div>
 
-                {/* Animated counters */}
+          <aside className="card-surface p-6 sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-secondary)]">
+              Right now
+            </p>
+            <h3 className="mt-4 text-2xl font-semibold text-[var(--color-primary)] sm:text-3xl">
+              Shipping fintech workflows and learning how product decisions ripple
+              through the whole stack.
+            </h3>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {[
+                ['5,654+', 'Stocks handled in portfolio data flows'],
+                ['8.61', 'Current B.Tech CGPA'],
+                ['3', 'Personal projects highlighted below'],
+              ].map(([value, label]) => (
                 <div
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 p-6 sm:p-8 md:p-12 rounded-3xl border"
-                    style={{
-                        backgroundColor: 'var(--color-surface)',
-                        borderColor: 'var(--color-border)',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                    }}
+                  key={label}
+                  className="rounded-2xl border border-[var(--color-border)] bg-[rgba(255,255,255,0.58)] p-4"
                 >
-                    {counters.map(({ label, target, suffix }, i) => (
-                        <div key={i} className="text-center py-4 sm:py-0">
-                            <AnimatedCounter target={target} suffix={suffix} />
-                            <p className="text-xs sm:text-sm mt-2 font-medium" style={{ color: 'var(--color-secondary)' }}>
-                                {label}
-                            </p>
-                        </div>
-                    ))}
+                  <p className="text-3xl font-semibold text-[var(--color-primary)]">
+                    {value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-secondary)]">
+                    {label}
+                  </p>
                 </div>
+              ))}
             </div>
-        </section>
-    );
+          </aside>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {highlights.map(({ Icon, title, desc }) => (
+            <div key={title} className="highlight-card card-surface p-6 md:p-8">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(235,94,40,0.12)] text-[var(--color-accent)]">
+                <Icon size={22} />
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--color-primary)]">
+                {title}
+              </h3>
+              <p className="mt-3 text-base leading-7 text-[var(--color-secondary)]">
+                {desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
